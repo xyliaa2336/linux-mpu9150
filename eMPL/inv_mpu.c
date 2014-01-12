@@ -951,7 +951,7 @@ int mpu_get_accel_reg(short *data, unsigned long *timestamp)
  *  @param[out] timestamp   Timestamp in milliseconds. Null if not needed.
  *  @return     0 if successful.
  */
-int mpu_get_temperature(long *data, unsigned long *timestamp)
+int mpu_get_temperature(short *data, unsigned long *timestamp)
 {
     unsigned char tmp[2];
     short raw;
@@ -964,8 +964,8 @@ int mpu_get_temperature(long *data, unsigned long *timestamp)
     raw = (tmp[0] << 8) | tmp[1];
     if (timestamp)
         get_ms(timestamp);
-
-    data[0] = (long)((35 + ((raw - (float)st.hw->temp_offset) / st.hw->temp_sens)) * 65536L);
+    data[0]=raw;
+    //data[0] = (long)((35 + ((raw - (float)st.hw->temp_offset) / st.hw->temp_sens)) * 65536L);
     return 0;
 }
 

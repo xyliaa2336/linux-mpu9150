@@ -104,7 +104,7 @@ int mpu_set_accel_bias(const long *accel_bias);
 int mpu_get_gyro_reg(short *data, unsigned long *timestamp);
 int mpu_get_accel_reg(short *data, unsigned long *timestamp);
 int mpu_get_compass_reg(short *data, unsigned long *timestamp);
-int mpu_get_temperature(long *data, unsigned long *timestamp);
+int mpu_get_temperature(short *data, unsigned long *timestamp);
 
 int mpu_get_int_status(short *status);
 int mpu_read_fifo(short *gyro, short *accel, unsigned long *timestamp,

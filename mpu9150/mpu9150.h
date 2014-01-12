@@ -54,6 +54,8 @@ typedef struct {
 	short rawMag[3];
 	unsigned long magTimestamp;
 
+	short Temp[3];
+	
 	short calibratedAccel[3];
 	short calibratedMag[3];
 

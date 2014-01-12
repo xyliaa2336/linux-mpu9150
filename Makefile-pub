@@ -1,0 +1,71 @@
+#
+# Makefile for eMPL Linux userland implementation
+#
+
+CC = gcc
+CFLAGS = -g -Wall -fsingle-precision-constant 
+CCFLAGS_SO =  -fPIC -Os -fvisibility=hidden
+
+# add -DI2C_DEBUG for debugging
+DEFS = -DEMPL_TARGET_LINUX -DMPU9150 -DAK8975_SECONDARY
+
+LDFLAGS_A = -shared -Wl,-soname,libpaho-mqtt3a.so.1 -Wl,-init,MQTTAsync_init 
+
+MQTTLIB_C_TARGET = ${blddir}/lib${MQTTLIB_C}.so.${VERSION}
+MQTTLIB_CS_TARGET = ${blddir}/lib${MQTTLIB_CS}.so.${VERSION}
+MQTTLIB_A_TARGET = ${blddir}/lib${MQTTLIB_A}.so.${VERSION}
+MQTTLIB_AS_TARGET = ${blddir}/lib${MQTTLIB_AS}.so.${VERSION}
+MQTTVERSION_TARGET = ${blddir}/MQTTVersion
+
+EMPLDIR = eMPL
+GLUEDIR = glue
+MPUDIR = mpu9150
+MQTTDIR = /home/pi/MPU9150/linux-mpu9150/MQTT_stuff
+
+OBJS = inv_mpu.o \
+       inv_mpu_dmp_motion_driver.o \
+       linux_glue.o \
+       mpu9150.o \
+       quaternion.o \
+       vector3d.o 
+
+
+all : imu imucal
+
+
+imu : $(OBJS) imu.o
+	$(CC) $(CFLAGS) $(CFLAGS_SO) $(OBJS) imu.o -lm -o imu -lpaho-mqtt3a -lpthread -L $(MQTTDIR)
+
+imucal : $(OBJS) imucal.o
+	$(CC) $(CFLAGS) $(CFLAGS_SO) $(OBJS) imucal.o -lm -o imucal -lpaho-mqtt3a -lpthread -L $(MQTTDIR)
+
+	
+imu.o : imu.c
+	$(CC) $(CFLAGS) -I $(EMPLDIR) -I $(GLUEDIR) -I $(MPUDIR) -I $(MQTTDIR)/src -L $(MQTTDIR) $(DEFS) -c imu.c
+	
+imucal.o : imucal.c
+	$(CC) $(CFLAGS) -I $(EMPLDIR) -I $(GLUEDIR) -I $(MPUDIR) -I $(MQTTDIR)/src -L $(MQTTDIR) $(DEFS) -c imucal.c
+
+mpu9150.o : $(MPUDIR)/mpu9150.c
+	$(CC) $(CFLAGS) $(DEFS) -I $(EMPLDIR) -I $(GLUEDIR) -c $(MPUDIR)/mpu9150.c
+
+quaternion.o : $(MPUDIR)/quaternion.c
+	$(CC) $(CFLAGS) $(DEFS) -c $(MPUDIR)/quaternion.c
+
+vector3d.o : $(MPUDIR)/vector3d.c
+	$(CC) $(CFLAGS) $(DEFS) -c $(MPUDIR)/vector3d.c
+
+linux_glue.o : $(GLUEDIR)/linux_glue.c
+	$(CC) $(CFLAGS) $(DEFS) -I $(EMPLDIR) -I $(GLUEDIR) -c $(GLUEDIR)/linux_glue.c
+
+inv_mpu_dmp_motion_driver.o : $(EMPLDIR)/inv_mpu_dmp_motion_driver.c
+	$(CC) $(CFLAGS) $(DEFS) -I $(EMPLDIR) -I $(GLUEDIR) -c $(EMPLDIR)/inv_mpu_dmp_motion_driver.c
+
+inv_mpu.o : $(EMPLDIR)/inv_mpu.c
+	$(CC) $(CFLAGS) $(DEFS) -I $(EMPLDIR) -I $(GLUEDIR) -c $(EMPLDIR)/inv_mpu.c
+
+MQTTAsync.o : $(MQTTDIR)/src/MQTTAsync.c
+	$(CC) $(CFLAGS) $(DEFS) -I $(EMPLDIR) -I $(GLUEDIR) -c $(EMPLDIR)/inv_mpu.c
+clean:
+	rm -f *.o imu imucal
+
